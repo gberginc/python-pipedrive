@@ -1,5 +1,6 @@
 from httplib2 import Http
 from logging import getLogger
+import json
 
 try:
     from urllib import urlencode
@@ -32,19 +33,19 @@ class Pipedrive(object):
             uri = PIPEDRIVE_API_URL + endpoint + '?api_token=' + str(self.api_token)
             if data:
                 uri += '&' + urlencode(data)
-            response, data = self.http.request(uri, method=method, headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            response, data = self.http.request(uri, method=method, headers={'Content-Type': 'application/json'})
         elif method == "PUT":
             # Put methods are used to update existing records, we'll use the id from the data to build the relevant URL
             # If no id is passed in the data, raise an error
             if 'id' in data:
                 putid = data.pop('id')
                 uri = '{0}{1}/{2}?api_token={3}'.format(PIPEDRIVE_API_URL,endpoint,str(putid),str(self.api_token))
-                response, data = self.http.request(uri, method=method, body=urlencode(data), headers={'Content-Type': 'application/x-www-form-urlencoded'})
+                response, data = self.http.request(uri, method=method, body=json.dumps(data), headers={'Content-Type': 'application/json'})
             else:
                 raise ValueError('id was not provided in data, unable to perform Pipedrive update via PUT')
         else:
             uri = PIPEDRIVE_API_URL + endpoint + '?api_token=' + str(self.api_token)
-            response, data = self.http.request(uri, method=method, body=urlencode(data), headers={'Content-Type': 'application/x-www-form-urlencoded'})
+            response, data = self.http.request(uri, method=method, body=json.dumps(data), headers={'Content-Type': 'application/json'})
 
         logger.debug('sending {method} request to {uri}'.format(
             method=method,
